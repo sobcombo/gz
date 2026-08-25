@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Gamezone Combo Finder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;700&display=swap');
+
+*{box-sizing:border-box}
+
+body{
+    font-family:'Arimo',sans-serif;
+    background:#f5f5f5;
+    margin:0;
+    padding:18px;
+    text-align:center;
+    color:#222;
+}
+
+.main-title{
+    text-align:center;
+    font-size:34px;
+    font-weight:700;
+    line-height:1.1;
+    margin-bottom:25px;
+    color:#333;
+}
+
+.main-title::after{
+    content:"";
+    display:block;
+    width:180px;
+    height:4px;
+    margin:10px auto 0;
+    background:#e53935;
+    border-radius:10px;
+}
+
+.box{
+    background:white;
+    max-width:450px;
+    margin:auto;
+    padding:18px;
+    border-radius:12px;
+    box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+
+input{
+    width:90%;
+    max-width:340px;
+    padding:12px;
+    margin:7px 0;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:15px;
+    outline:none;
+    font-family:'Arimo',sans-serif;
+}
+
+input::placeholder{
+    font-family:'Arimo',sans-serif;
+    font-weight:400;
+}
+
+.red-field{
+    border:2px solid #e53935 !important;
+    box-shadow:0 0 8px rgba(229,57,53,.35);
+}
+
+.input-row{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+}
+
+.input-row input{width:50%}
+
+.reset-btn{
+    display:block;
+    margin:12px auto;
+    padding:7px 16px;
+    border:none;
+    border-radius:7px;
+    background:#e0e0e0;
+    cursor:pointer;
+    font-family:'Arimo',sans-serif;
+}
+
+.result{
+    margin-top:18px;
+    text-align:left;
+}
+
+.combo{
+    background:#fafafa;
+    border:1px solid #e2e2e2;
+    border-radius:10px;
+    padding:14px;
+    margin-bottom:14px;
+}
+
+.title{
+    font-weight:bold;
+    color:#1565c0;
+    font-size:16px;
+    line-height:1.4;
+}
+
+.gamezone-total{
+    color:#2e7d32;
+    font-size:13px;
+    font-weight:bold;
+    margin-top:4px;
+}
+
+.inclusions{
+    margin-top:8px;
+    margin-bottom:9px;
+}
+
+.inclusion{
+    font-size:13px;
+    padding:3px 0;
+    color:#2e7d32;
+}
+
+.inclusion::before{
+    content:"• ";
+    color:#2e7d32;
+    font-weight:bold;
+}
+
+.sub{
+    font-size:12px;
+    font-weight:400;
+    color:#777;
+    margin-bottom:5px;
+}
+
+.ac{
+    background:#f1f1f1;
+    border-radius:6px;
+    padding:8px 10px;
+    margin-bottom:5px;
+    font-size:14px;
+    line-height:1.5;
+}
+
+.no-match{
+    background:white;
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:15px;
+    text-align:center;
+    color:#777;
+}
+
+@media(max-width:480px){
+    body{padding:10px}
+    .main-title{font-size:29px}
+    .box{padding:14px}
+    .ac{font-size:13px}
+}
+</style>
+</head>
+
+<body>
+<h2 class="main-title">
+    Gamezone<br>
+    Combo Finder
+</h2>
+
+<div class="box">
+    <input type="number" id="tpu" min="0" placeholder="Enter TPU Amount" oninput="reverseCalc()">
+    <input type="number" id="gamezone" min="0" placeholder="Enter Gamezone Amount" oninput="reverseCalc()">
+    <input type="number" id="totalAmount" min="0" class="red-field" placeholder="Enter Total Combo Amount" oninput="reverseCalc()">
+    <input type="number" id="guestCount" min="0" max="100" placeholder="Total Guests" oninput="reverseCalc()">
+
+    <div class="input-row">
+        <input type="number" id="adultCount" min="0" max="100" placeholder="Adults" oninput="reverseCalc()">
+        <input type="number" id="childCount" min="0" max="100" placeholder="Children" oninput="reverseCalc()">
+    </div>
+
+    <button class="reset-btn" onclick="resetFields()">Reset</button>
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+const combos = [
+    {
+        name:"397/307 Adventure Combo",
+        adultTPU:170, childTPU:80,
+        adultPrice:397, childPrice:307,
+        inclusions:[
+            {name:"5 Adventure Rides",amount:177},
+            {name:"1 Pick / 1 Drop",amount:50}
+        ],
+        gamezonePerPerson:227
+    },
+    {
+        name:"499/399 Aastha Combo",
+        adultTPU:400, childTPU:300,
+        adultPrice:499, childPrice:399,
+        inclusions:[
+            {name:"1 Pick / 1 Drop",amount:99}
+        ],
+        gamezonePerPerson:99
+    },
+    {
+        name:"545/355 Shiv Ganesha Combo",
+        adultTPU:170, childTPU:80,
+        adultPrice:545, childPrice:355,
+        inclusions:[
+            {name:"1 Pick / 1 Drop",amount:50}
+        ],
+        gamezonePerPerson:50
+    },
+    {
+        name:"600/425 Namah Combo",
+        adultTPU:550, childTPU:375,
+        adultPrice:600, childPrice:425,
+        inclusions:[
+            {name:"1 Pick / 1 Drop",amount:50}
+        ],
+        gamezonePerPerson:50
+    },
+    {
+        name:"699 Ultimate Play Combo",
+        adultTPU:170, childTPU:170,
+        adultPrice:699, childPrice:null,
+        inclusions:[
+            {name:"5 Amusement Rides",amount:129},
+            {name:"5 Adventure Rides",amount:150},
+            {name:"Go Karting",amount:150},
+            {name:"3 Pick / 3 Drop",amount:100}
+        ],
+        gamezonePerPerson:529
+    },
+    {
+        name:"745/555 Viewing Fun Combo",
+        adultTPU:370, childTPU:180,
+        adultPrice:745, childPrice:555,
+        inclusions:[
+            {name:"1 Pick / 1 Drop",amount:50}
+        ],
+        gamezonePerPerson:50
+    },
+    {
+        name:"969/794 Symbolic Combo",
+        adultTPU:550, childTPU:375,
+        adultPrice:969, childPrice:794,
+        inclusions:[
+            {name:"1 Pick / 1 Drop",amount:100}
+        ],
+        gamezonePerPerson:100
+    },
+    {
+        name:"1099/1009 Delight Combo",
+        adultTPU:170, childTPU:80,
+        adultPrice:1099, childPrice:1009,
+        inclusions:[
+            {name:"5 Adventure Rides",amount:200},
+            {name:"1 Pick / 1 Drop",amount:49}
+        ],
+        gamezonePerPerson:249
+    },
+    {
+        name:"1299/1109 Mini Blast Combo",
+        adultTPU:370, childTPU:180,
+        adultPrice:1299, childPrice:1109,
+        inclusions:[
+            {name:"5 Adventure Rides",amount:200},
+            {name:"1 Pick / 1 Drop",amount:49}
+        ],
+        gamezonePerPerson:249
+    },
+    {
+        name:"1399/1224 All in Fun Combo",
+        adultTPU:550, childTPU:375,
+        adultPrice:1399, childPrice:1224,
+        inclusions:[
+            {name:"5 Adventure Rides",amount:200},
+            {name:"1 Pick / 1 Drop",amount:79}
+        ],
+        gamezonePerPerson:279
+    },
+    {
+        name:"1500/925 Divine Rush Combo",
+        adultTPU:1350, childTPU:775,
+        adultPrice:1500, childPrice:925,
+        inclusions:[
+            {name:"3 Pick / 3 Drop",amount:100}
+        ],
+        gamezonePerPerson:100
+    },
+    {
+        name:"4199 Ultimate Mega Combo",
+        adultTPU:1400, childTPU:1400,
+        adultPrice:4199, childPrice:null,
+        inclusions:[
+            {name:"5 Amusement Rides",amount:150},
+            {name:"5 Adventure Rides",amount:150},
+            {name:"Go Karting",amount:150},
+            {name:"Cricket",amount:50},
+            {name:"Bungee Jumping",amount:1500},
+            {name:"3 Pick / 3 Drop",amount:100}
+        ],
+        gamezonePerPerson:2100
+    }
+];
+
+function getNumber(id){
+    const value=parseFloat(document.getElementById(id).value);
+    return Number.isFinite(value) && value>=0 ? value : 0;
+}
+
+function isEmpty(id){
+    return document.getElementById(id).value.trim()==="";
+}
+
+function everythingEmpty(){
+    return [
+        "tpu","gamezone","totalAmount",
+        "guestCount","adultCount","childCount"
+    ].every(id=>isEmpty(id));
+}
+
+function reverseCalc(){
+    const tpu=getNumber("tpu");
+    const gamezone=getNumber("gamezone");
+    const totalAmount=getNumber("totalAmount");
+
+    const guestValue=document.getElementById("guestCount").value;
+    const adultValue=document.getElementById("adultCount").value;
+    const childValue=document.getElementById("childCount").value;
+
+    const guestCount=guestValue===""?NaN:Math.max(0,Math.min(100,parseInt(guestValue)));
+    const adultCount=adultValue===""?NaN:Math.max(0,Math.min(100,parseInt(adultValue)));
+    const childCount=childValue===""?NaN:Math.max(0,Math.min(100,parseInt(childValue)));
+
+    if(everythingEmpty()){
+        document.getElementById("result").innerHTML="";
+        return;
+    }
+
+    if(!isNaN(guestCount)&&!isNaN(adultCount)&&!isNaN(childCount)&&
+       guestCount!==adultCount+childCount){
+        document.getElementById("result").innerHTML=`
+            <div class="no-match">
+                Total Guests (${guestCount}) does not match
+                Adults + Children (${adultCount+childCount})
+            </div>`;
+        return;
+    }
+
+    let html="";
+
+    combos
+    .filter(combo=>combo.gamezonePerPerson>0)
+    .forEach(combo=>{
+        const matches=[];
+        const startPax=!isNaN(guestCount)?guestCount:1;
+        const endPax=!isNaN(guestCount)?guestCount:100;
+
+        for(let pax=startPax;pax<=endPax;pax++){
+            if(combo.childPrice!==null){
+                for(let a=0;a<=pax;a++){
+                    const ch=pax-a;
+                    const comboTPU=(a*combo.adultTPU)+(ch*combo.childTPU);
+                    const comboGamezone=pax*combo.gamezonePerPerson;
+                    const comboTotal=(a*combo.adultPrice)+(ch*combo.childPrice);
+
+                    if(isMatch(
+                        comboTPU,comboGamezone,comboTotal,pax,a,ch,
+                        tpu,gamezone,totalAmount,
+                        guestCount,adultCount,childCount
+                    )){
+                        matches.push({
+                            a,ch,pax,comboTPU,comboGamezone,comboTotal
+                        });
+                    }
+                }
+            }else{
+                const a=pax;
+                const ch=0;
+                const comboTPU=a*combo.adultTPU;
+                const comboGamezone=pax*combo.gamezonePerPerson;
+                const comboTotal=a*combo.adultPrice;
+
+                if(isMatch(
+                    comboTPU,comboGamezone,comboTotal,pax,a,ch,
+                    tpu,gamezone,totalAmount,
+                    guestCount,adultCount,childCount
+                )){
+                    matches.push({
+                        a,ch,pax,comboTPU,comboGamezone,comboTotal
+                    });
+                }
+            }
+        }
+
+        if(matches.length){
+            html+=`
+                <div class="combo">
+                    <div class="title">
+                        ${combo.name}
+                        <div class="gamezone-total">
+                            Gamezone included: ₹${combo.gamezonePerPerson} per guest
+                        </div>
+                    </div>`;
+
+            if(combo.inclusions.length>0){
+                html+=`<div class="inclusions">`;
+
+                combo.inclusions.forEach(item=>{
+                    html+=`
+                        <div class="inclusion">
+                            ${item.name}: ₹${item.amount}
+                        </div>`;
+                });
+
+                html+=`</div>`;
+            }
+
+            html+=`<div class="sub">Possibilities</div>`;
+
+            matches.forEach(m=>{
+                html+=`
+                    <div class="ac">
+                        A: ${m.a} | C: ${m.ch} | Pax: ${m.pax} |
+                        TPU: ₹${m.comboTPU} |
+                        Gamezone: ₹${m.comboGamezone} |
+                        Total: ₹${m.comboTotal}
+                    </div>`;
+            });
+
+            html+=`</div>`;
+        }
+    });
+
+    document.getElementById("result").innerHTML=html||`
+        <div class="no-match">No matching combo found.</div>`;
+}
+
+function isMatch(
+    comboTPU,comboGamezone,comboTotal,pax,adults,children,
+    enteredTPU,enteredGamezone,enteredTotal,
+    enteredGuests,enteredAdults,enteredChildren
+){
+    if(!isEmpty("tpu")&&comboTPU!==enteredTPU)return false;
+    if(!isEmpty("gamezone")&&comboGamezone!==enteredGamezone)return false;
+    if(!isEmpty("totalAmount")&&comboTotal!==enteredTotal)return false;
+    if(!isNaN(enteredGuests)&&pax!==enteredGuests)return false;
+    if(!isNaN(enteredAdults)&&adults!==enteredAdults)return false;
+    if(!isNaN(enteredChildren)&&children!==enteredChildren)return false;
+    return true;
+}
+
+function resetFields(){
+    [
+        "tpu","gamezone","totalAmount",
+        "guestCount","adultCount","childCount"
+    ].forEach(id=>document.getElementById(id).value="");
+
+    document.getElementById("result").innerHTML="";
+}
+</script>
+</body>
+</html>
